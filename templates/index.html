@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Tutor Pro</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        #chatBox { margin-top: 20px; padding: 10px; border: 1px solid #ccc; width: 400px; height: 300px; overflow-y: scroll; background-color: #f9f9f9; }
+        p { margin: 5px 0; }
+        .user-msg { color: blue; font-weight: bold; }
+        .ai-msg { color: green; }
+    </style>
+</head>
+<body>
+
+<h2>AI Tutor</h2>
+
+<input type="text" id="chat" placeholder="Type your question here..." style="width: 300px; padding: 5px;">
+<button onclick="sendMessage()" style="padding: 5px 10px;">Send</button>
+
+<div id="chatBox"></div>
+
+<script>
+function sendMessage() {
+    let inputField = document.getElementById("chat");
+    let text = inputField.value;
+
+    if (text.trim() === "") return;
+
+    let chatBox = document.getElementById("chatBox");
+    
+    // 1. Display user message
+    chatBox.innerHTML += "<p class='user-msg'>You: " + text + "</p>";
+    inputField.value = ""; 
+    chatBox.scrollTop = chatBox.scrollHeight; 
+
+    // 2. Add a temporary "Thinking..." message
+    let loadingId = "loading-" + Date.now();
+    chatBox.innerHTML += "<p id='" + loadingId + "' class='ai-msg' style='color: gray; font-style: italic;'>AI Tutor is thinking...</p>";
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    fetch("/ask", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({question: text})
+    })
+    .then(res => res.json())
+    .then(data => {
+        // 3. Remove the "Thinking..." message
+        document.getElementById(loadingId).remove();
+        
+        // 4. Display the actual AI message
+        chatBox.innerHTML += "<p class='ai-msg'>AI Tutor: " + data.answer + "</p>";
+        chatBox.scrollTop = chatBox.scrollHeight; 
+    })
+    .catch(err => {
+        document.getElementById(loadingId).remove();
+        chatBox.innerHTML += "<p style='color: red;'>Error connecting to server.</p>";
+    });
+}
+</script>
+
+</body>
+</html>
