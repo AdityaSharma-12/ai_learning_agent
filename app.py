@@ -5,7 +5,7 @@ import os
 app = Flask(__name__)
 
 # 👉 Replace with your actual OpenRouter / OpenAI API Key
-API_KEY = "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"
+API_KEY = os.getenv("API_KEY")
 @app.route('/')
 def home():
     return render_template("index.html")
